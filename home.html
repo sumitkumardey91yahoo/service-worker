@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+
+<head>
+    <meta charset="utf-8">
+    <title></title>
+    <script src="https://www.gstatic.com/firebasejs/3.5.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/3.5.0/firebase-messaging.js"></script>
+
+    <script type="text/javascript">
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('./service-worker.js').then((success) => {
+                console.log("register successfully")
+            }, (error) => {
+                console.log(" not register successfully")
+
+            });
+        } else {
+            console.log("not present")
+        }
+
+
+        fetch('https://randomuser.me/api/?results=10')
+            .then((resp) => resp.json()) // Transform the data into json
+            .then(function(data) {
+                console.log("data", data);
+                let total = ''
+                for (let i of data.results) {
+                    total += `<p>name: ${i.name.first}</p>`
+                }
+                document.getElementById('ok').innerHTML = total;
+            })
+
+
+
+        firebase.initializeApp({
+
+            messagingSenderId: "213810697791"
+
+        });
+
+        firebase.messaging().requestPermission().then(function() {
+            return firebase.messaging().getToken();
+        }).then(function(token) {
+            console.log("token", token);
+        }).catch(function(error) {
+            console.log('[App | initAWSMA | Notification | requestPermission | error ]', error);
+        })
+
+        navigator.serviceWorker.addEventListener("message", (message) => {
+            navigator.serviceWorker.ready.then(function(registration) {
+                console.log(message)
+                const notificationTitle = 'Background Message Title';
+                const notificationOptions = {
+                    body: 'Background Message body.'
+                };
+
+                registration.showNotification(notificationTitle, notificationOptions);
+            });
+        });
+    </script>
+</head>
+
+<body>
+    <div id="ok"></div>
+</body>
+
+</html>
